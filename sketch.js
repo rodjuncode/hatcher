@@ -45,6 +45,13 @@ function draw() {
   push();
   noFill();
   for (let polygon of polygons) {
+    // check mouse hovering
+    if (isPointInPolygon(mouseX, mouseY, polygon.vertexes)) {
+      polygon.highlighted = true;
+    } else {
+      polygon.highlighted = false;
+    }
+
     push();
     if (polygon === selectedPolygon) {
       strokeWeight(3);
@@ -147,15 +154,15 @@ function mousePressed() {
     }
   } else if (mouseButton === RIGHT) {
     let highlightedPolygons = polygons.filter(p => p.highlighted);
-    if (highlightedPolygons.length > 0) {
-      if (polygonsCluster.length > 0 && highlightedPolygons.every( e => polygonsCluster.includes(e) )) {
-        polygonsClusterIndex = (polygonsClusterIndex + 1) % polygonsCluster.length;
-      } else {
-        polygonsCluster = highlightedPolygons;
-        polygonsClusterIndex = 0;
-      }
-      selectedPolygon = polygonsCluster[polygonsClusterIndex];
+    if (polygonsCluster.length > 0 
+        && highlightedPolygons.length == polygonsCluster.length 
+        && highlightedPolygons.every( e => polygonsCluster.includes(e) )) {
+      polygonsClusterIndex = (polygonsClusterIndex + 1) % polygonsCluster.length;
+    } else {
+      polygonsCluster = highlightedPolygons;
+      polygonsClusterIndex = 0;
     }
+    selectedPolygon = polygonsCluster[polygonsClusterIndex];
   }
 }
 
@@ -199,16 +206,6 @@ function keyPressed() {
 
 }
 
-// test if mouse is over any polygon
-function mouseMoved() {
-  for (let polygon of polygons) {
-    if (isPointInPolygon(mouseX, mouseY, polygon.vertexes)) {
-      polygon.highlighted = true;
-    } else {
-      polygon.highlighted = false;
-    }
-  }
-}
 
 // test if a point is inside a polygon
 function isPointInPolygon(x, y, polygon) {
