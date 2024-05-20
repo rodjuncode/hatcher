@@ -11,6 +11,26 @@ let polygonsClusterIndex = undefined;
 const EDIT_HATCH_ANGLE = 0, EDIT_HATCH_VALUE = 1;
 let editHatchMode = EDIT_HATCH_VALUE;
 
+function preload() {
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  
+  let importPolygons = params.import;
+  
+
+  if (importPolygons) {
+    polygons = JSON.parse(importPolygons);
+  }
+
+  for (p of polygons) {
+    p.boundingBox = boundingBox(p);
+    p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height);
+    hatching(p);
+  }
+
+  console.log(polygons);
+}
+
 function setup() {
   // set canvas to be as big as browser window  
   createCanvas(windowWidth, windowHeight);
@@ -168,13 +188,19 @@ function mousePressed() {
 
 
 function doubleClicked() {
-
+  
   if (isDrawingPolygon()) {
     currentPolygon.boundingBox = boundingBox(currentPolygon);
     currentPolygon.texture = createGraphics(currentPolygon.boundingBox.width, currentPolygon.boundingBox.height);
     hatching(currentPolygon);
     polygons.push(currentPolygon);
     currentPolygon = {};
+
+    console.log("## 🤖: 'You can keep this code to save your work.'")
+    console.log(JSON.stringify(
+      polygons.map(function(p) { return { vertexes: p.vertexes, value: p.value, angle: p.angle }})
+    ));
+
   }
 }
 
