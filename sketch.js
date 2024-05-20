@@ -20,15 +20,18 @@ function preload() {
 
   if (importPolygons) {
     polygons = JSON.parse(importPolygons);
+    let n = 0;
+    for (p of polygons) {
+      p.boundingBox = boundingBox(p);
+      p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height);
+      hatching(p);
+      n++;
+    }
+    console.log("## 🤖: 'You've just imported " + n + " polygon(s)!'");
   }
 
-  for (p of polygons) {
-    p.boundingBox = boundingBox(p);
-    p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height);
-    hatching(p);
-  }
 
-  console.log(polygons);
+  
 }
 
 function setup() {
@@ -44,7 +47,7 @@ function setup() {
 }
 
 function draw() {
-  background(255);
+  background(240);
 
   // Draw the image if it's loaded
   push();
@@ -196,9 +199,9 @@ function doubleClicked() {
     polygons.push(currentPolygon);
     currentPolygon = {};
 
-    console.log("## 🤖: 'You can keep this code to save your work.'")
+    console.log("## 🤖: 'You can keep this code to save your work.'");
     console.log(JSON.stringify(
-      polygons.map(function(p) { return { vertexes: p.vertexes, value: p.value, angle: p.angle }})
+      polygons.map(function(p) { return { vertexes: p.vertexes, value: p.value, hatchAngle: p.hatchAngle }})
     ));
 
   }
