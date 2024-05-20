@@ -179,6 +179,9 @@ function keyPressed() {
     selectedPolygon = undefined;
   } else if (key === ' ') {
     showImg = !showImg;
+  } else if (keyCode === DELETE) {
+    polygons = polygons.filter(polygon => polygon !== selectedPolygon);
+    selectedPolygon = undefined;
   }
 
 }
