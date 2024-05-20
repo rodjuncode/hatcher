@@ -5,6 +5,11 @@ let polygons = [];
 let currentPolygon = {};
 let showImg = true;
 let selectedPolygon = undefined;
+let polygonsCluster = [];
+let polygonsClusterIndex = undefined;
+
+const EDIT_HATCH_ANGLE = 0, EDIT_HATCH_VALUE = 1;
+let editHatchMode = EDIT_HATCH_VALUE;
 
 function setup() {
   // set canvas to be as big as browser window  
@@ -97,39 +102,14 @@ function draw() {
   pop();
 
   if (mouseIsPressed) {
-    if (mouseButton === LEFT) {
-      if (img) {
-        if (!isDrawingPolygon()) {
-          currentPolygon = {
-            vertexes: [{ x: mouseX, y: mouseY }],
-            highlighted: false,
-            value: random(),
-            hatchAngle: random(TWO_PI),
-          }
-          selectedPolygon = undefined;
-        } else {
-          currentPolygon.vertexes.push({ x: mouseX, y: mouseY });
-        }
-        return;
-      }
-
-    } else if (mouseButton === RIGHT) {
-      // if a polygon is higlighted, select it
-      for (let polygon of polygons) {
-        if (polygon.highlighted) {
-          selectedPolygon = polygon;
-          return;
-        }
-      }
-    }
-
 
   }
 }
 
 function mouseWheel(event) {
-  // check if ctrl key is pressed
-  if (keyIsDown(ALT)) {
+  if (!selectedPolygon) return;
+  
+  if (editHatchMode == EDIT_HATCH_VALUE) {
     if (selectedPolygon) {
       selectedPolygon.hatchAngle += event.delta / 1000;
     }
@@ -145,6 +125,37 @@ function mouseWheel(event) {
 function mouseClicked() {
   if (!img) {
     fileInput.elt.click();
+    return;
+  }
+}
+
+function mousePressed() {
+  if (mouseButton === LEFT) {
+    if (img) {
+      if (!isDrawingPolygon()) {
+        currentPolygon = {
+          vertexes: [{ x: mouseX, y: mouseY }],
+          highlighted: false,
+          value: random(),
+          hatchAngle: random(TWO_PI),
+        }
+        selectedPolygon = undefined;
+      } else {
+        currentPolygon.vertexes.push({ x: mouseX, y: mouseY });
+      }
+      return;
+    }
+  } else if (mouseButton === RIGHT) {
+    let highlightedPolygons = polygons.filter(p => p.highlighted);
+    if (highlightedPolygons.length > 0) {
+      if (polygonsCluster.length > 0 && highlightedPolygons.every( e => polygonsCluster.includes(e) )) {
+        polygonsClusterIndex = (polygonsClusterIndex + 1) % polygonsCluster.length;
+      } else {
+        polygonsCluster = highlightedPolygons;
+        polygonsClusterIndex = 0;
+      }
+      selectedPolygon = polygonsCluster[polygonsClusterIndex];
+    }
   }
 }
 
@@ -182,6 +193,8 @@ function keyPressed() {
   } else if (keyCode === DELETE) {
     polygons = polygons.filter(polygon => polygon !== selectedPolygon);
     selectedPolygon = undefined;
+  } else if (keyCode === SHIFT) {
+    editHatchMode = (editHatchMode + 1) % 2;
   }
 
 }
