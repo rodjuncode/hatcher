@@ -189,7 +189,7 @@ function mousePressed() {
 
 function doubleClicked() {
   
-  if (isDrawingPolygon()) {
+  if (isDrawingPolygon() && currentPolygon.vertexes.length >= 3) {
     currentPolygon.boundingBox = boundingBox(currentPolygon);
     currentPolygon.texture = createGraphics(currentPolygon.boundingBox.width, currentPolygon.boundingBox.height);
     hatching(currentPolygon);
