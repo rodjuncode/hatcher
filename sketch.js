@@ -7,6 +7,7 @@ let showImg = true;
 let selectedPolygon = undefined;
 let polygonsCluster = [];
 let polygonsClusterIndex = undefined;
+const MAX_VALUE = 5;
 
 const EDIT_HATCH_ANGLE = 0, EDIT_HATCH_VALUE = 1;
 let editHatchMode = EDIT_HATCH_VALUE;
@@ -141,12 +142,12 @@ function mouseWheel(event) {
   
   if (editHatchMode == EDIT_HATCH_VALUE) {
     if (selectedPolygon) {
-      selectedPolygon.hatchAngle += event.delta / 1000;
+      selectedPolygon.hatchAngle += event.delta / 500;
     }
   } else {
     if (selectedPolygon) {
-      selectedPolygon.value += event.delta / 1000;
-      selectedPolygon.value = constrain(selectedPolygon.value, 0, 1);
+      selectedPolygon.value += event.delta / 500;
+      selectedPolygon.value = constrain(selectedPolygon.value, 0, MAX_VALUE);
     }
   }
   hatching(selectedPolygon);
@@ -166,7 +167,7 @@ function mousePressed() {
         currentPolygon = {
           vertexes: [{ x: mouseX, y: mouseY }],
           highlighted: false,
-          value: random(),
+          value: random(MAX_VALUE),
           hatchAngle: random(TWO_PI),
         }
         selectedPolygon = undefined;
@@ -254,11 +255,12 @@ function hatching(currentPolygon) {
   currentPolygon.texture.translate(currentPolygon.boundingBox.width / 2, currentPolygon.boundingBox.height / 2); // Move the origin to the center of the canvas
   currentPolygon.texture.rotate(currentPolygon.hatchAngle); // Rotate the canvas by the specified angle
   let size = max(currentPolygon.boundingBox.width, currentPolygon.boundingBox.height)
-  let spacing = map(currentPolygon.value, 0, 1, 50, 1); // Map the value parameter to a spacing value
+  let spacing = map(currentPolygon.value, 0, MAX_VALUE, 40, 1); // Map the value parameter to a spacing value
 
-  let scribble = new Scribble(currentPolygon.texture);
+  // let scribble = new Scribble(currentPolygon.texture);
+  // scribble.maxOffset = 10; // Set the maximum offset for the scribble
   for (let x = -size; x < size; x += spacing) {
-    scribble.scribbleLine(x, -size, x, size);
+    // scribble.scribbleLine(x, -size, x, size);
     currentPolygon.texture.line(x, -size, x, size);
   }
   currentPolygon.texture.resetMatrix(); // Reset the transformation matrix
