@@ -36,7 +36,7 @@ function preload() {
 
 function setup() {
   // set canvas to be as big as browser window  
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, WEBGL);
 
   fileInput = createFileInput(handleFile);
   fileInput.hide(); // Hide the file input element
@@ -48,6 +48,8 @@ function setup() {
 
 function draw() {
   background(240);
+
+  translate(-width/2, -height/2);
 
   // Draw the image if it's loaded
   push();
@@ -194,7 +196,7 @@ function doubleClicked() {
   
   if (isDrawingPolygon() && currentPolygon.vertexes.length >= 3) {
     currentPolygon.boundingBox = boundingBox(currentPolygon);
-    currentPolygon.texture = createGraphics(currentPolygon.boundingBox.width, currentPolygon.boundingBox.height);
+    currentPolygon.texture = createGraphics(currentPolygon.boundingBox.width, currentPolygon.boundingBox.height, WEBGL);
     hatching(currentPolygon);
     polygons.push(currentPolygon);
     currentPolygon = {};
