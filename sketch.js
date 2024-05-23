@@ -14,6 +14,8 @@ const EDIT_HATCH_ANGLE = 0,
 let editHatchMode = EDIT_HATCH_VALUE;
 
 function preload() {
+  hatchingShader = loadShader("wiggly-lines.vert", "wiggly-lines.frag");
+
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
 
@@ -24,7 +26,11 @@ function preload() {
     let n = 0;
     for (p of polygons) {
       p.boundingBox = boundingBox(p);
-      p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height, WEBGL);
+      p.texture = createGraphics(
+        p.boundingBox.width,
+        p.boundingBox.height,
+        WEBGL
+      );
       hatching(p);
       n++;
     }
@@ -46,7 +52,7 @@ function setup() {
 function draw() {
   background(240);
 
-  translate(-width/2, -height/2);
+  translate(-width / 2, -height / 2);
 
   // Draw the image if it's loaded
   push();
@@ -64,8 +70,6 @@ function draw() {
         newHeight
       );
     }
-  } else {
-    // nothing
   }
   pop();
 
@@ -115,11 +119,12 @@ function draw() {
       noStroke();
       beginShape();
       for (let v of polygon.vertexes) {
-        vertex(v.x, v.y,0);
+        vertex(v.x, v.y, 0);
       }
       endShape(CLOSE);
       pop();
     });
+    blendMode(DARKEST)
     image(polygon.texture, polygon.boundingBox.minX, polygon.boundingBox.minY);
     pop();
   }
@@ -206,7 +211,8 @@ function doubleClicked() {
     currentPolygon.boundingBox = boundingBox(currentPolygon);
     currentPolygon.texture = createGraphics(
       currentPolygon.boundingBox.width,
-      currentPolygon.boundingBox.height, WEBGL
+      currentPolygon.boundingBox.height,
+      WEBGL
     );
     hatching(currentPolygon);
     polygons.push(currentPolygon);
@@ -271,19 +277,31 @@ function isPointInPolygon(x, y, polygon) {
 
 function hatching(currentPolygon) {
   currentPolygon.texture.clear(); // Clear the texture
-  currentPolygon.texture.rotate(currentPolygon.hatchAngle); // Rotate the canvas by the specified angle
-  let size = max(
+  currentPolygon.texture.shader(hatchingShader);
+
+  hatchingShader.setUniform("u_resolution", [currentPolygon.texture.width, currentPolygon.texture.height]);
+  hatchingShader.setUniform("u_density", .5);
+
+  // currentPolygon.texture.rotate(currentPolygon.hatchAngle); // Rotate the canvas by the specified angle
+  // let size = max(
+  //   currentPolygon.boundingBox.width,
+  //   currentPolygon.boundingBox.height
+  // );
+  // let spacing = map(currentPolygon.value, 0, MAX_VALUE, width / 10, 1); // Map the value parameter to a spacing value
+  // // let scribble = new Scribble(currentPolygon.texture);
+  // // scribble.maxOffset = 10; // Set the maximum offset for the scribble
+  // for (let x = -size; x < size; x += spacing) {
+  //   // scribble.scribbleLine(x, -size, x, size, 0);
+  //   currentPolygon.texture.line(x, -size, x, size);
+  // }
+  // currentPolygon.texture.resetMatrix(); // Reset the transformation matrix
+
+  currentPolygon.texture.rect(
+    -currentPolygon.boundingBox.width / 2,
+    -currentPolygon.boundingBox.height / 2,
     currentPolygon.boundingBox.width,
     currentPolygon.boundingBox.height
   );
-  let spacing = map(currentPolygon.value, 0, MAX_VALUE, width / 10, 1); // Map the value parameter to a spacing value
-  // let scribble = new Scribble(currentPolygon.texture);
-  // scribble.maxOffset = 10; // Set the maximum offset for the scribble
-  for (let x = -size; x < size; x += spacing) {
-    // scribble.scribbleLine(x, -size, x, size, 0);
-    currentPolygon.texture.line(x, -size, x, size);
-  }
-  currentPolygon.texture.resetMatrix(); // Reset the transformation matrix
 }
 
 function clipPolygon(polygon) {
