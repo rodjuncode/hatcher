@@ -24,7 +24,7 @@ function preload() {
     let n = 0;
     for (p of polygons) {
       p.boundingBox = boundingBox(p);
-      p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height);
+      p.texture = createGraphics(p.boundingBox.width, p.boundingBox.height, WEBGL);
       hatching(p);
       n++;
     }
@@ -108,11 +108,17 @@ function draw() {
       // }
     }
     clip(() => {
+      push();
+      c = color(0);
+      c.setAlpha(0);
+      fill(c);
+      noStroke();
       beginShape();
       for (let v of polygon.vertexes) {
-        vertex(v.x, v.y);
+        vertex(v.x, v.y,0);
       }
       endShape(CLOSE);
+      pop();
     });
     image(polygon.texture, polygon.boundingBox.minX, polygon.boundingBox.minY);
     pop();
@@ -265,32 +271,29 @@ function isPointInPolygon(x, y, polygon) {
 
 function hatching(currentPolygon) {
   currentPolygon.texture.clear(); // Clear the texture
-  currentPolygon.texture.translate(
-    currentPolygon.boundingBox.width / 2,
-    currentPolygon.boundingBox.height / 2
-  ); // Move the origin to the center of the canvas
   currentPolygon.texture.rotate(currentPolygon.hatchAngle); // Rotate the canvas by the specified angle
   let size = max(
     currentPolygon.boundingBox.width,
     currentPolygon.boundingBox.height
   );
   let spacing = map(currentPolygon.value, 0, MAX_VALUE, width / 10, 1); // Map the value parameter to a spacing value
-
-  let scribble = new Scribble(currentPolygon.texture);
-  scribble.maxOffset = 10; // Set the maximum offset for the scribble
+  // let scribble = new Scribble(currentPolygon.texture);
+  // scribble.maxOffset = 10; // Set the maximum offset for the scribble
   for (let x = -size; x < size; x += spacing) {
-    scribble.scribbleLine(x, -size, x, size);
-    // currentPolygon.texture.line(x, -size, x, size);
+    // scribble.scribbleLine(x, -size, x, size, 0);
+    currentPolygon.texture.line(x, -size, x, size);
   }
   currentPolygon.texture.resetMatrix(); // Reset the transformation matrix
 }
 
 function clipPolygon(polygon) {
+  push();
   beginShape();
   for (let v of polygon.vertexes) {
     vertex(v.x, v.y);
   }
   endShape(CLOSE);
+  pop();
 }
 
 function boundingBox(polygon) {
